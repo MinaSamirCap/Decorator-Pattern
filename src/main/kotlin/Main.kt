@@ -1,32 +1,19 @@
 import java.time.Clock
 import java.util.*
-
-interface Logger {
+fun interface Logger {
     fun log(message: String)
 }
 
-class ConsoleLogger : Logger {
-    override fun log(message: String) {
-        print(message)
-    }
-}
-
-class UniqueIdLogger(private val logger: Logger) : Logger {
-    override fun log(message: String) =
-        logger.log("{${UUID.randomUUID()}} $message")
-}
-
-class ThreadNameLogger(private val logger: Logger) : Logger {
-    override fun log(message: String) =
-        logger.log("$message (on ${Thread.currentThread().name} thread)")
-}
-
-class DateTimeLogger(private val logger: Logger, private val clock: Clock = Clock.systemDefaultZone()) : Logger {
-    override fun log(message: String) =
-        logger.log("[${clock.instant()}] $message")
-}
+val consoleLogger = Logger { message -> print(message) }
+fun Logger.withUniqueId() = Logger { log("{${UUID.randomUUID()}} $it") }
+fun Logger.withThreadName() = Logger { log("$it (on ${Thread.currentThread().name} thread)") }
+fun Logger.withDateTime(clock: Clock = Clock.systemDefaultZone()) = Logger { log("[${clock.instant()}] $it") }
 
 fun main() {
-    val logger = UniqueIdLogger(ThreadNameLogger(DateTimeLogger(ConsoleLogger())))
+    val logger = consoleLogger.withUniqueId().withThreadName().withDateTime()
     logger.log("Application initialized")
 }
+
+
+/// references ...
+//https://www.youtube.com/watch?v=erWsXSqQ-CM
